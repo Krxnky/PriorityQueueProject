@@ -30,26 +30,46 @@ public class ResourceManagement
   public ResourceManagement( String fileNames[], Double budget )
   {
     /* Create a department for each file listed in fileNames */
-    List<Department> departments = new ArrayList<>();
+    this.departmentPQ = new PriorityQueue<>();
+    this.budget = budget;
+    this.remainingBudget = budget;
 
-    try {
-        for (String fileName : fileNames) {
-            departments.add(new Department(fileName));
-        }
-    } catch (Exception e)
-    {
-      e.printStackTrace();
-      System.out.println("Failed to create departments");
+    for (String fileName : fileNames) {
+      this.departmentPQ.add(new Department(fileName));
     }
-
-
     
     /* Simulate the algorithm for picking the items to purchase */
     /* Be sure to print the items out as you purchase them */
     /* Here's the part of the code I used for printing prices as items */
     //String price = String.format("$%.2f", /*Item's price*/ );
     //System.out.printf("Department of %-30s- %-30s- %30s\n", /*Department's name*/, /*Item's name*/, price );
-    
+
+    while(this.remainingBudget > 0 && !this.departmentPQ.isEmpty()) {
+      Department department = this.departmentPQ.poll();
+
+      while(!department.itemsDesired.isEmpty() && department.itemsDesired.peek().price > this.remainingBudget) {
+        department.itemsRemoved.add(department.itemsDesired.poll());
+      }
+
+      if(department.itemsDesired.isEmpty()) {
+        double scholarshipAmount = Math.min(1000, remainingBudget);
+        this.remainingBudget -= scholarshipAmount;
+
+        department.priority += scholarshipAmount;
+
+      } else {
+        Item nextDesired = department.itemsDesired.poll();
+        this.remainingBudget -= nextDesired.price;
+        department.itemsReceived.add(nextDesired);
+
+        department.priority += nextDesired.price;
+
+        String price = String.format("$%.2f", nextDesired.price );
+        System.out.printf("Purchased item for department of %-30s- %-30s- %30s\n", department.name, nextDesired.name, price );
+      }
+
+      this.departmentPQ.add(department);
+    }
     
   } 
 
@@ -100,7 +120,6 @@ class Department implements Comparable<Department>
 
         Double itemPrice = Double.parseDouble(scan.nextLine().trim());
         this.itemsDesired.add(new Item(itemName, itemPrice));
-        System.out.println(itemName + " " + itemPrice);
       }
     } catch (FileNotFoundException e) {
       e.printStackTrace();
