@@ -47,27 +47,32 @@ public class ResourceManagement
     while(this.remainingBudget > 0 && !this.departmentPQ.isEmpty()) {
       Department department = this.departmentPQ.poll();
 
+      // Remove remaining items that are too expensive for budget
       while(!department.itemsDesired.isEmpty() && department.itemsDesired.peek().price > this.remainingBudget) {
         department.itemsRemoved.add(department.itemsDesired.poll());
       }
 
+      // Check if no more desired items and add scholarship of $1000 or remaining budget
       if(department.itemsDesired.isEmpty()) {
         double scholarshipAmount = Math.min(1000, remainingBudget);
         this.remainingBudget -= scholarshipAmount;
 
         department.priority += scholarshipAmount;
+        department.itemsReceived.add(new Item("Scholarship", scholarshipAmount));
 
-      } else {
+      } else { // If there are still desired items purchase the next one
         Item nextDesired = department.itemsDesired.poll();
-        this.remainingBudget -= nextDesired.price;
-        department.itemsReceived.add(nextDesired);
 
+        this.remainingBudget -= nextDesired.price;
+
+        department.itemsReceived.add(nextDesired);
         department.priority += nextDesired.price;
 
         String price = String.format("$%.2f", nextDesired.price );
         System.out.printf("Purchased item for department of %-30s- %-30s- %30s\n", department.name, nextDesired.name, price );
       }
 
+      // Add department back to queue with updated priority
       this.departmentPQ.add(department);
     }
     
@@ -83,6 +88,25 @@ public class ResourceManagement
     /* Here's the part of the code I used for printing prices */
     //String price = String.format("$%.2f", /*Item's price*/ );
     //System.out.printf("%-30s - %30s\n", /*Item's name*/, price );
+
+    for (Department department : this.departmentPQ) {
+      System.out.printf("Department of %s%n", department.name);
+      System.out.printf("Total Spent       = $%.2f%n", department.priority);
+      System.out.printf("Percent of Budget = %.2f%%%n", (department.priority / this.budget) * 100);
+      System.out.println("----------------------------");
+      System.out.println("ITEMS RECEIVED");
+      for (Item item : department.itemsReceived) {
+        String price = String.format("$%.2f", item.price );
+        System.out.printf("%-30s - %30s%n", item.name, price);
+      }
+      System.out.println();
+      System.out.println("ITEMS NOT RECEIVED");
+      for (Item item : department.itemsRemoved) {
+        String price = String.format("$%.2f", item.price );
+        System.out.printf("%-30s - %30s%n", item.name, price);
+      }
+      System.out.println();
+    }
   }   
 }
 

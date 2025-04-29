@@ -43,9 +43,10 @@ public class Driver {
   public static void testFile( String fileNames[], double budget ) {  
     String budgetString = String.format("$%.2f", budget );
     System.out.println("----------------------------TESTING with budget = " + budgetString + "----------------------------");
-    System.out.println("");
+    System.out.println();
 
     ResourceManagement rm = new ResourceManagement(fileNames, budget);
-    rm.printSummary();  
+    System.out.println();
+    rm.printSummary();
   }
 }
