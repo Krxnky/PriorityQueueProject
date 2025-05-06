@@ -18,8 +18,8 @@ public class ResourceManagement
   {
     /* TODO : Fill in your name */
     System.out.println("This solution was completed by:");
-    System.out.println("<student name>");
-    System.out.println("<student name #2 (if no partner write \"N/A\")>");
+    System.out.println("Rylan Larson");
+    System.out.println("Ethan Silberberg");
   }
 
   /* Constructor for a ResourceManagement object
@@ -72,10 +72,17 @@ public class ResourceManagement
         System.out.printf("Purchased item for department of %-30s- %-30s- %30s\n", department.name, nextDesired.name, price );
       }
 
-      // Add department back to queue with updated priority
       this.departmentPQ.add(department);
     }
-    
+
+
+    // For departments that didn't get processed or still have desired items,
+    // move all remaining desired items to the removed list
+    for (Department dept : this.departmentPQ) {
+      while (!dept.itemsDesired.isEmpty()) {
+        dept.itemsRemoved.add(dept.itemsDesired.poll());
+      }
+    }
   } 
 
   /* printSummary
@@ -134,16 +141,17 @@ class Department implements Comparable<Department>
 
     File file = new File(fileName);
     try (Scanner scan = new Scanner(file)) {
-      this.name = scan.nextLine();
+      if(scan.hasNextLine()) {
+        this.name = scan.nextLine();
+      }
 
-      while(scan.hasNextLine()) {
-        scan.nextLine();
+      while(scan.hasNext()) {
+        String itemName = scan.next();
 
-        String itemName = scan.nextLine().trim();
-        if(itemName.isEmpty()) break;
-
-        Double itemPrice = Double.parseDouble(scan.nextLine().trim());
-        this.itemsDesired.add(new Item(itemName, itemPrice));
+        if (scan.hasNextDouble()) {
+          Double itemPrice = scan.nextDouble();
+          this.itemsDesired.add(new Item(itemName, itemPrice));
+        }
       }
     } catch (FileNotFoundException e) {
       e.printStackTrace();
